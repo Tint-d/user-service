@@ -1,0 +1,31 @@
+version: '3'
+services:
+  user-service:
+    build: .
+    ports:
+      - '3001:3000'
+    environment:
+      DATABASE_URL: postgres://postgres:24897@db:5432/user-service
+    depends_on:
+      - db
+      - rabbitmq
+
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 24897
+      POSTGRES_DB: user-service # This database is specific to the User Service
+    ports:
+      - '5432:5432'
+    volumes:
+      - user-postgres-data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: 'rabbitmq:3-management'
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+
+volumes:
+  user-postgres-data:

@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int              @id @default(autoincrement())
+  email          String           @unique
+  password       String
+  roles          Role[]           @relation("UserRoles")
+  permissions    Permission[]     @relation("UserPermissions")
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  UserRole       UserRole[]
+  UserPermission UserPermission[]
+}
+
+model Role {
+  id             Int              @id @default(autoincrement())
+  name           RoleName // Enum instead of String for role name
+  users          User[]           @relation("UserRoles")
+  permissions    Permission[]     @relation("RolePermissions")
+  UserRole       UserRole[]
+  RolePermission RolePermission[]
+}
+
+model Permission {
+  id             Int              @id @default(autoincrement())
+  name           PermissionName // Enum instead of String for permission name
+  roles          Role[]           @relation("RolePermissions")
+  users          User[]           @relation("UserPermissions")
+  UserPermission UserPermission[]
+  RolePermission RolePermission[]
+}
+
+model UserRole {
+  userId Int
+  roleId Int
+  user   User @relation(fields: [userId], references: [id])
+  role   Role @relation(fields: [roleId], references: [id])
+
+  @@id([userId, roleId])
+}
+
+model UserPermission {
+  userId       Int
+  permissionId Int
+  user         User       @relation(fields: [userId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([userId, permissionId])
+}
+
+model RolePermission {
+  roleId       Int
+  permissionId Int
+  role         Role       @relation(fields: [roleId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([roleId, permissionId])
+}
+
+enum RoleName {
+  ADMIN
+  CUSTOMER_SUPPORT
+  USER
+  SUPER_ADMIN
+}
+
+enum PermissionName {
+  MANAGE_PRODUCTS
+  VIEW_ORDERS
+  MANAGE_USERS
+  PROCESS_PAYMENTS
+  MANAGE_SHIPPING
+}
