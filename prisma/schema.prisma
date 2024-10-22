@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -15,7 +9,7 @@ datasource db {
 
 model User {
   id             Int              @id @default(autoincrement())
-  email          String           @unique
+  emailOrPhone   String           @unique
   password       String
   roles          Role[]           @relation("UserRoles")
   permissions    Permission[]     @relation("UserPermissions")
@@ -23,11 +17,15 @@ model User {
   updatedAt      DateTime         @updatedAt
   UserRole       UserRole[]
   UserPermission UserPermission[]
+  isBanned       Boolean          @default(false)
+  banReason      String?
+  banDate        DateTime?
+  refreshToken   String?
 }
 
 model Role {
   id             Int              @id @default(autoincrement())
-  name           RoleName // Enum instead of String for role name
+  name           RoleName
   users          User[]           @relation("UserRoles")
   permissions    Permission[]     @relation("RolePermissions")
   UserRole       UserRole[]
@@ -36,7 +34,7 @@ model Role {
 
 model Permission {
   id             Int              @id @default(autoincrement())
-  name           PermissionName // Enum instead of String for permission name
+  name           PermissionName
   roles          Role[]           @relation("RolePermissions")
   users          User[]           @relation("UserPermissions")
   UserPermission UserPermission[]

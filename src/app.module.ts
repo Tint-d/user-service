@@ -1,25 +1,35 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { AppService } from './app.service';
-import { AppController } from './app.controller';
+import { PrismaModule } from './prisma/prisma.module';
+import { HelloController } from './hello/hello.controller';
+import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
+import { RedisService } from './redis/redis.service';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    // RabbitMQ client setup
     ClientsModule.register([
       {
         name: 'RABBITMQ_SERVICE',
         transport: Transport.RMQ,
         options: {
-          urls: ['amqp://rabbitmq:rabbitmq@localhost:5672'], // RabbitMQ URI
-          queue: 'your_queue_name', // Define the queue name you will use
+          urls: ['amqp://guest:guest@rabbitmq:5672'],
+          queue: 'user_service',
           queueOptions: {
-            durable: false, // Make sure messages persist if needed
+            durable: false,
           },
         },
       },
     ]),
+    RedisModule,
+    PrismaModule,
+    AuthModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [HelloController],
+  providers: [],
+  exports: [],
 })
 export class AppModule {}

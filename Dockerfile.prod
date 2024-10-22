@@ -2,7 +2,7 @@
 FROM node:22.3.0
 
 # Set working directory
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Install pnpm globally
 RUN npm install -g pnpm
@@ -19,9 +19,10 @@ RUN npx prisma generate
 # Build the application
 RUN pnpm run build
 
+RUN rm -rf ./src
 # Expose the application's port
 EXPOSE 3000
 
 # Command to run the app
-CMD ["pnpm", "run", "start:dev"]
+CMD ["pnpm", "run", "start:prod"]
 
